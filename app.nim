@@ -1,28 +1,8 @@
 import jester
 import strutils
 import httpcore
-import htmlgen
 
-proc registerForm(errList: seq[string]): string =
-  var msgString = ""
-  if errList.len > 0:
-    var innerString = ""
-    for msg in errList:
-      innerString &= li(b(msg))
-    msgString = p("Errors Found") & ul(innerString)
-  result = html(
-    head(title("book club")),
-    body(
-      "Enter your email to sign up.",
-      msgString,
-      form(
-        action = "/register-form",
-        `method` = "POST",
-        input(`type` = "text", name = "email"),
-        button(type = "submit", "Send Email Address")
-      )
-    )
-  )
+include "registerform.nimf"
 
 proc checkEmailFormat(email: string): seq[string] =
   result = @[]

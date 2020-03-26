@@ -1,0 +1,24 @@
+#? stdtmpl(subsChar = '$', metaChar = '#')
+#proc registerForm(errList: seq[string]): string =
+#  result = ""
+<html>
+  <head>
+    <title>book club</title>
+  </head>
+  <body>
+    <h3>Register</h3>
+    Enter your email address to sign up.
+    # if errList.len > 0:
+      <p>Errors Found</p>
+      <ul>
+    #  for errMsg in errList:
+        <li><b>${errMsg}</b></li>
+    #  end for
+    # end if
+      </ul>
+    <form action="/register-form" method="POST">
+      <input type="text" name="email">
+      <button type="submit">Send Email Address</button>
+    </form>
+  </body>
+<html>
