@@ -2,7 +2,30 @@ import jester
 import strutils
 import httpcore
 
-include "registerform.nimf"
+import json
+
+import karax / [karaxdsl, vdom]
+
+proc registerForm(errList: seq[string]): string =
+  let vnode = buildHtml(html):
+    head:
+      title: text "book club"
+    body:
+      h3: text "Register"
+      text "Enter your email address to sign up."
+      if errList.len > 0:
+        p:
+          text "Error(s) Found"
+        ul:
+          for msg in errList:
+            li:
+              bold: text msg
+      form(action = "/register-form", `method` = "POST"):
+        input(`type` = "text", name = "email")
+        button(`type` = "submit"):
+          text "Send Email Address"
+  return $vnode
+
 
 proc checkEmailFormat(email: string): seq[string] =
   result = @[]
@@ -32,3 +55,13 @@ routes:
       redirect "/hello/$1".format(request.params["email"])
   get "/hello/@email":
     resp "hello $1!".format(@"email")
+  get "/api/1.0/me/clublist":
+    let clublist = parseJson("""
+      {
+        "clublist": [
+          {"name": "Mystery Club"},
+          {"name": "Iowa Clean Livin' Club"}
+        ]
+      }
+    """)
+    resp clublist
