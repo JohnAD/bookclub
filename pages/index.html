@@ -1,0 +1,17 @@
+<div class="jumbotron">
+  <h1 class="display-4">Welcome to Virtual Book club</h1>
+  <p class="lead">The worlds best source of book clubs online.</p>
+  <hr class="my-4">
+  <p>Feel free to visit any or all of the clubs. Create an account if you wish to join a club.</p>
+</div>
+
+<h2>Largest Book Clubs</h2>
+
+<div class="list-group">
+  {{#club_list}}
+  <a class="list-group-item list-group-item-action" href="/club/{{club_id}}">
+    {{name}}
+    <span class="badge badge-primary badge-pill">{{member_count}}</span>
+  </a>
+  {{/club_list}}
+</div>

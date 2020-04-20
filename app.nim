@@ -4,64 +4,47 @@ import httpcore
 
 import json
 
-import karax / [karaxdsl, vdom]
+import views
+import misc
 
-proc registerForm(errList: seq[string]): string =
-  let vnode = buildHtml(html):
-    head:
-      title: text "book club"
-    body:
-      h3: text "Register"
-      text "Enter your email address to sign up."
-      if errList.len > 0:
-        p:
-          text "Error(s) Found"
-        ul:
-          for msg in errList:
-            li:
-              bold: text msg
-      form(action = "/register-form", `method` = "POST"):
-        input(`type` = "text", name = "email")
-        button(`type` = "submit"):
-          text "Send Email Address"
-  return $vnode
-
-
-proc checkEmailFormat(email: string): seq[string] =
-  result = @[]
-  var parts = email.split('@')
-  if parts.len < 2:
-    result.add "MissingAtSymbol"
-  elif parts.len > 2:
-    result.add "TooManyAtSymbols"
-  if email.contains(" "):
-    result.add "ContainsSpace"
-  if email == "":
-    result.add "EmailEmpty"
+let topClubs = %* [
+  {"name": "club one", "club_id": "1", "member_count": "40"},
+  {"name": "club 2 hooray", "club_id": "2", "member_count": "20"}
+]
 
 routes:
   get "/":
-    resp "hello world"
+    var content = newJObject()
+    content["page_title"] = newJString("Virtual Book Club")
+    content["logged_in"] = newJBool(false)
+    content["club_list"] = topClubs
+    resp showPage("index", content, @[])
   get "/register-form":
-    resp registerForm(@[])
+    var content = newJObject()
+    content["page_title"] = newJString("Register")
+    content["logged_in"] = newJBool(false)
+    resp showPage("register-form", content, @[])
   get "/register-form/@err":
-    let errors = @"err".split("|")
-    resp registerForm(errors)
+    let errors = @"err".split(",")
+    var content = newJObject()
+    content["page_title"] = newJString("Register")
+    content["logged_in"] = newJBool(false)
+    resp showPage("register-form", content, errors)
   post "/register-form":
     let errors = checkEmailFormat(request.params["email"])
     if errors.len > 0:
-      redirect "/register-form/$1".format(errors.join("|"))
+      redirect "/register-form/$1".format(errors.join(","))
     else:
-      redirect "/hello/$1".format(request.params["email"])
-  get "/hello/@email":
-    resp "hello $1!".format(@"email")
-  get "/api/1.0/me/clublist":
-    let clublist = parseJson("""
-      {
-        "clublist": [
-          {"name": "Mystery Club"},
-          {"name": "Iowa Clean Livin' Club"}
-        ]
-      }
-    """)
-    resp clublist
+      redirect "/email-sent/$1".format(request.params["email"])
+  post "/register-form/@err":
+    let errors = checkEmailFormat(request.params["email"])
+    if errors.len > 0:
+      redirect "/register-form/$1".format(errors.join(","))
+    else:
+      redirect "/email-sent/$1".format(request.params["email"])
+  get "/email-sent/@email":
+    var content = newJObject()
+    content["page_title"] = newJString("Register")
+    content["logged_in"] = newJBool(false)
+    content["email_address"] = newJString(@"email")
+    resp showPage("email-sent", content, @[])
